@@ -1,1 +1,422 @@
 
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DreamFlow-AI | برنامه‌ریز شخصی</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6fb;
+  color: #202437;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+header {
+  background: linear-gradient(135deg, #6157e8, #9287ff);
+  color: white;
+  padding: 28px;
+  border-radius: 22px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  margin: 0 0 10px;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.card {
+  background: white;
+  padding: 22px;
+  margin-bottom: 18px;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px #0000000d;
+}
+
+label {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: bold;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d7d9e5;
+  border-radius: 10px;
+  font-size: 16px;
+  background: white;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 14px;
+  background: #6157e8;
+  color: white;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.secondary {
+  background: #e9e7ff;
+  color: #5147ce;
+}
+
+.danger {
+  background: #e74c3c;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.route-result {
+  background: #f0efff;
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 15px;
+  line-height: 1.9;
+}
+
+.task {
+  border: 1px solid #e0e2ed;
+  padding: 15px;
+  border-radius: 12px;
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.task.done {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+.task button {
+  margin: 0;
+  padding: 8px 12px;
+}
+
+small {
+  color: #666b80;
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    padding: 12px;
+  }
+
+  header {
+    padding: 22px;
+  }
+
+  .task {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+  <h1>🌊 DreamFlow-AI</h1>
+  <p>برنامه‌ریز شخصی هوشمند من</p>
+  <small style="color:white">
+    برنامه‌ریزی روزانه، مدیریت کارها و محاسبهٔ رفت‌وآمد
+  </small>
+</header>
+
+<div class="card">
+  <h2>📅 برنامهٔ روزانه</h2>
+
+  <label for="date">تاریخ</label>
+  <input type="date" id="date">
+
+  <label for="taskName">نام کار</label>
+  <input id="taskName" placeholder="مثلاً مدرسه، درس ریاضی یا کلاس گیتار">
+
+  <div class="grid">
+    <div>
+      <label for="startTime">ساعت شروع</label>
+      <input type="time" id="startTime" value="08:00">
+    </div>
+
+    <div>
+      <label for="endTime">ساعت پایان</label>
+      <input type="time" id="endTime" value="09:00">
+    </div>
+  </div>
+
+  <button onclick="addTask()">➕ افزودن کار</button>
+
+  <div id="taskList"></div>
+</div>
+
+<div class="card">
+  <h2>🗺️ محاسبهٔ رفت‌وآمد</h2>
+
+  <label for="from">مبدأ</label>
+  <input id="from" placeholder="مثلاً خانه">
+
+  <label for="to">مقصد</label>
+  <input id="to" placeholder="مثلاً مدرسه">
+
+  <div class="grid">
+    <div>
+      <label for="travelMinutes">مدت رفت‌وآمد (دقیقه)</label>
+      <input type="number" id="travelMinutes" value="30" min="0">
+    </div>
+
+    <div>
+      <label for="arrivalTime">ساعت رسیدن</label>
+      <input type="time" id="arrivalTime" value="08:00">
+    </div>
+  </div>
+
+  <button onclick="calculateTravel()">محاسبهٔ ساعت خروج</button>
+
+  <div id="routeResult" class="route-result">
+    اطلاعات مسیر را وارد کن.
+  </div>
+
+  <button class="secondary" onclick="openMaps()">
+    📍 باز کردن مسیر در Google Maps
+  </button>
+
+  <p>
+    <small>
+      برای محاسبهٔ واقعی زمان سفر، مدت رفت‌وآمد را از Google Maps بررسی کن
+      و در قسمت بالا وارد کن.
+    </small>
+  </p>
+</div>
+
+<div class="card">
+  <h2>💾 ذخیرهٔ برنامه</h2>
+  <button onclick="savePlan()">ذخیره در این مرورگر</button>
+  <button class="secondary" onclick="loadPlan()">بازیابی برنامه</button>
+  <button class="danger" onclick="clearPlan()">پاک کردن برنامه</button>
+  <p id="saveMessage"></p>
+</div>
+
+</div>
+
+<script>
+let tasks = [];
+
+const dateInput = document.getElementById("date");
+
+dateInput.value = new Date().toISOString().split("T")[0];
+
+function addTask() {
+  const name = document.getElementById("taskName").value.trim();
+  const start = document.getElementById("startTime").value;
+  const end = document.getElementById("endTime").value;
+
+  if (!name || !start || !end) {
+    alert("لطفاً نام کار و ساعت‌ها را وارد کن.");
+    return;
+  }
+
+  tasks.push({
+    name: name,
+    start: start,
+    end: end,
+    done: false
+  });
+
+  document.getElementById("taskName").value = "";
+  renderTasks();
+}
+
+function renderTasks() {
+  const list = document.getElementById("taskList");
+  list.innerHTML = "";
+
+  if (tasks.length === 0) {
+    list.innerHTML = "<p>هنوز کاری اضافه نشده است.</p>";
+    return;
+  }
+
+  tasks.forEach((task, index) => {
+    const item = document.createElement("div");
+    item.className = "task" + (task.done ? " done" : "");
+
+    const info = document.createElement("div");
+    info.innerHTML =
+      "<strong>" + escapeHTML(task.name) + "</strong><br>" +
+      "<small>" + task.start + " تا " + task.end + "</small>";
+
+    const actions = document.createElement("div");
+
+    const doneButton = document.createElement("button");
+    doneButton.className = "secondary";
+    doneButton.textContent = task.done ? "بازگرداندن" : "انجام شد";
+    doneButton.onclick = () => {
+      tasks[index].done = !tasks[index].done;
+      renderTasks();
+    };
+
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "danger";
+    deleteButton.textContent = "حذف";
+    deleteButton.onclick = () => {
+      tasks.splice(index, 1);
+      renderTasks();
+    };
+
+    actions.appendChild(doneButton);
+    actions.appendChild(deleteButton);
+
+    item.appendChild(info);
+    item.appendChild(actions);
+    list.appendChild(item);
+  });
+}
+
+function escapeHTML(text) {
+  return text.replace(/[&<>"']/g, function(char) {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    }[char];
+  });
+}
+
+function calculateTravel() {
+  const minutes = Number(
+    document.getElementById("travelMinutes").value
+  );
+
+  const arrival = document.getElementById("arrivalTime").value;
+
+  if (!arrival || minutes < 0 || !Number.isFinite(minutes)) {
+    alert("لطفاً ساعت و مدت رفت‌وآمد معتبر وارد کن.");
+    return;
+  }
+
+  const parts = arrival.split(":");
+  const date = new Date();
+
+  date.setHours(Number(parts[0]));
+  date.setMinutes(Number(parts[1]) - minutes);
+  date.setSeconds(0);
+
+  const departure = date.toLocaleTimeString("de-DE", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
+  const from = document.getElementById("from").value || "مبدأ";
+  const to = document.getElementById("to").value || "مقصد";
+
+  document.getElementById("routeResult").innerHTML =
+    "<strong>🚶 مسیر: </strong>" +
+    escapeHTML(from) + " ← " + escapeHTML(to) +
+    "<br><strong>ساعت خروج پیشنهادی: </strong>" +
+    departure +
+    "<br><strong>مدت سفر: </strong>" +
+    minutes + " دقیقه";
+}
+
+function openMaps() {
+  const from = document.getElementById("from").value.trim();
+  const to = document.getElementById("to").value.trim();
+
+  if (!from || !to) {
+    alert("لطفاً مبدأ و مقصد را وارد کن.");
+    return;
+  }
+
+  const url =
+    "https://www.google.com/maps/dir/?api=1" +
+    "&origin=" + encodeURIComponent(from) +
+    "&destination=" + encodeURIComponent(to);
+
+  window.open(url, "_blank");
+}
+
+function savePlan() {
+  const data = {
+    date: dateInput.value,
+    tasks: tasks
+  };
+
+  localStorage.setItem("dreamflowPlan", JSON.stringify(data));
+
+  document.getElementById("saveMessage").textContent =
+    "✅ برنامه در این مرورگر ذخیره شد.";
+}
+
+function loadPlan() {
+  const saved = localStorage.getItem("dreamflowPlan");
+
+  if (!saved) {
+    alert("هنوز برنامه‌ای ذخیره نشده است.");
+    return;
+  }
+
+  const data = JSON.parse(saved);
+
+  dateInput.value = data.date || dateInput.value;
+  tasks = Array.isArray(data.tasks) ? data.tasks : [];
+
+  renderTasks();
+
+  document.getElementById("saveMessage").textContent =
+    "✅ برنامه بازیابی شد.";
+}
+
+function clearPlan() {
+  if (confirm("آیا مطمئنی می‌خواهی برنامه پاک شود؟")) {
+    tasks = [];
+    localStorage.removeItem("dreamflowPlan");
+    renderTasks();
+
+    document.getElementById("saveMessage").textContent =
+      "برنامه پاک شد.";
+  }
+}
+
+renderTasks();
+</script>
+
+</body>
+</html>
+
